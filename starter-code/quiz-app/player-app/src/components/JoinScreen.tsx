@@ -51,7 +51,7 @@ function JoinScreen({ onJoin, error }: JoinScreenProps) {
                 <input
                     className="code-input"
                     type="text"
-                    placeholder="ABC123"
+                    placeholder="Le code du quizz"
                     maxLength={6}
                     value={code}
                     onChange={(e) => setCode(e.target.value.toUpperCase())}
