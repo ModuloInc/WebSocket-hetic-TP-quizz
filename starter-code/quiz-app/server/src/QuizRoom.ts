@@ -147,6 +147,12 @@ export class QuizRoom {
     // TODO: Decrementer remaining
     // TODO: Envoyer 'tick' a tous
     // TODO: Si temps ecoule, appeler timeUp()
+    this.remaining -= 1
+    this.broadcastToAll({ type: 'tick', remaining: this.remaining })
+
+    if (this.remaining <= 0) {
+      this.timeUp()
+    }
   }
 
   /**
@@ -159,6 +165,15 @@ export class QuizRoom {
     // TODO: Annuler le timer
     // TODO: Changer la phase
     // TODO: Envoyer les resultats
+    if (this.timerId) {
+      clearInterval(this.timerId)
+      this.timerId = null
+    }
+
+    if (this.phase !== 'question') return
+
+    this.phase = 'results'
+    this.broadcastResults()
   }
 
   /**
