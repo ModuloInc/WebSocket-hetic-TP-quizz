@@ -7,14 +7,14 @@ import { useState } from 'react'
 import type { QuizQuestion } from '@shared/index'
 
 interface AnswerScreenProps {
-  /** La question en cours (sans correctIndex) */
-  question: Omit<QuizQuestion, 'correctIndex'>
-  /** Temps restant en secondes */
-  remaining: number
-  /** Callback quand le joueur clique sur un choix */
-  onAnswer: (choiceIndex: number) => void
-  /** Si true, le joueur a deja repondu */
-  hasAnswered: boolean
+    /** La question en cours (sans correctIndex) */
+    question: Omit<QuizQuestion, 'correctIndex'>
+    /** Temps restant en secondes */
+    remaining: number
+    /** Callback quand le joueur clique sur un choix */
+    onAnswer: (choiceIndex: number) => void
+    /** Si true, le joueur a deja repondu */
+    hasAnswered: boolean
 }
 
 /**
@@ -34,21 +34,41 @@ interface AnswerScreenProps {
  * .answer-question, .answer-grid, .answer-btn, .selected, .answered-message
  */
 function AnswerScreen({ question, remaining, onAnswer, hasAnswered }: AnswerScreenProps) {
-  // TODO: State optionnel pour stocker l'index du choix selectionne
+    // TODO: State optionnel pour stocker l'index du choix selectionne
+    const [selectedIndex, setSelectedIndex] = useState<number | null>(null)
 
-  const handleClick = (index: number) => {
-    // TODO: Appeler onAnswer(index)
-    // TODO: Optionnel : sauvegarder l'index selectionne pour le style .selected
-  }
+    const handleClick = (index: number) => {
+        // TODO: Appeler onAnswer(index)
+        // TODO: Optionnel : sauvegarder l'index selectionne pour le style .selected
+        setSelectedIndex(index)
+        onAnswer(index)
+    }
 
-  return (
-    <div className="answer-screen">
-      {/* TODO: Timer avec .answer-timer (+ .warning / .danger selon remaining) */}
-      {/* TODO: Texte de la question avec .answer-question */}
-      {/* TODO: Grille de 4 boutons avec .answer-grid et .answer-btn */}
-      {/* TODO: Message "Reponse envoyee !" si hasAnswered */}
-    </div>
-  )
+    return (
+        <div className="answer-screen">
+            {/* TODO: Timer avec .answer-timer (+ .warning / .danger selon remaining) */}
+            <div className={`answer-timer${remaining <= 3 ? ' danger' : remaining <= 10 ? ' warning' : ''}`}>
+                {remaining}s
+            </div>
+            {/* TODO: Texte de la question avec .answer-question */}
+            <p className="answer-question">{question.text}</p>
+            {/* TODO: Grille de 4 boutons avec .answer-grid et .answer-btn */}
+            <div className="answer-grid">
+                {question.choices.map((choice, index) => (
+                    <button
+                        key={index}
+                        className={`answer-btn${selectedIndex === index ? ' selected' : ''}`}
+                        disabled={hasAnswered}
+                        onClick={() => handleClick(index)}
+                    >
+                        {choice}
+                    </button>
+                ))}
+            </div>
+            {/* TODO: Message "Reponse envoyee !" si hasAnswered */}
+            {hasAnswered && <p className="answered-message">Reponse envoyee !</p>}
+        </div>
+    )
 }
 
 export default AnswerScreen
