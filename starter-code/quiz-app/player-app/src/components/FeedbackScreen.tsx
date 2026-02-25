@@ -4,10 +4,10 @@
 // ============================================================
 
 interface FeedbackScreenProps {
-  /** Si true, le joueur a repondu correctement */
-  correct: boolean
-  /** Score total actuel du joueur */
-  score: number
+    /** Si true, le joueur a repondu correctement */
+    correct: boolean
+    /** Score total actuel du joueur */
+    score: number
 }
 
 /**
@@ -24,14 +24,19 @@ interface FeedbackScreenProps {
  * .feedback-icon, .feedback-text, .feedback-score
  */
 function FeedbackScreen({ correct, score }: FeedbackScreenProps) {
-  return (
-    <div className="phase-container feedback-container">
-      {/* TODO: Conteneur .feedback avec .correct ou .incorrect */}
-      {/* TODO: Icone .feedback-icon */}
-      {/* TODO: Texte "Bonne reponse !" ou "Mauvaise reponse" */}
-      {/* TODO: Score "Score : {score} pts" */}
-    </div>
-  )
+    return (
+        <div className="phase-container feedback-container">
+            {/* TODO: Conteneur .feedback avec .correct ou .incorrect */}
+            {/* TODO: Icone .feedback-icon */}
+            {/* TODO: Texte "Bonne reponse !" ou "Mauvaise reponse" */}
+            {/* TODO: Score "Score : {score} pts" */}
+            <div className={`feedback ${correct ? 'correct' : 'incorrect'}`}>
+                <div className="feedback-icon" />
+                <p className="feedback-text">{correct ? 'Bonne reponse !' : 'Mauvaise reponse'}</p>
+                <p className="feedback-score">Score : {score} pts</p>
+            </div>
+        </div>
+    )
 }
 
 export default FeedbackScreen

@@ -4,10 +4,10 @@
 // ============================================================
 
 interface ScoreScreenProps {
-  /** Classement trie par score decroissant */
-  rankings: { name: string; score: number }[]
-  /** Nom du joueur actuel (pour le mettre en surbrillance) */
-  playerName: string
+    /** Classement trie par score decroissant */
+    rankings: { name: string; score: number }[]
+    /** Nom du joueur actuel (pour le mettre en surbrillance) */
+    playerName: string
 }
 
 /**
@@ -27,16 +27,27 @@ interface ScoreScreenProps {
  * .leaderboard-item, .is-me, .leaderboard-rank, .leaderboard-name, .leaderboard-score
  */
 function ScoreScreen({ rankings, playerName }: ScoreScreenProps) {
-  return (
-    <div className="phase-container score-screen">
-      {/* TODO: Titre "Classement" avec .leaderboard-title */}
-      <div className="leaderboard">
-        {/* TODO: Pour chaque joueur dans rankings, afficher un .leaderboard-item */}
-        {/* TODO: Ajouter la classe .is-me si ranking.name === playerName */}
-        {/* TODO: Afficher rang, nom et score */}
-      </div>
-    </div>
-  )
+    return (
+        <div className="phase-container score-screen">
+            {/* TODO: Titre "Classement" avec .leaderboard-title */}
+            <h2 className="leaderboard-title">Classement</h2>
+            <div className="leaderboard">
+                {/* TODO: Pour chaque joueur dans rankings, afficher un .leaderboard-item */}
+                {/* TODO: Ajouter la classe .is-me si ranking.name === playerName */}
+                {/* TODO: Afficher rang, nom et score */}
+                {rankings.map((player, index) => (
+                    <div
+                        key={player.name}
+                        className={`leaderboard-item${player.name === playerName ? ' is-me' : ''}`}
+                    >
+                        <span className="leaderboard-rank">{index + 1}</span>
+                        <span className="leaderboard-name">{player.name}</span>
+                        <span className="leaderboard-score">{player.score} pts</span>
+                    </div>
+                ))}
+            </div>
+        </div>
+    )
 }
 
 export default ScoreScreen
