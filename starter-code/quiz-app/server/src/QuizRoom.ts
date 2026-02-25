@@ -216,6 +216,18 @@ export class QuizRoom {
     // TODO: Construire le tableau rankings trie par score decroissant
     // TODO: Changer la phase
     // TODO: Envoyer 'leaderboard' a tous
+    const rankings = Array.from(this.players.values())
+      .map((player) => ({
+        name: player.name,
+        score: this.scores.get(player.id) ?? 0,
+      }))
+      .sort((a, b) => b.score - a.score)
+
+    this.phase = 'leaderboard'
+    this.broadcastToAll({
+      type: 'leaderboard',
+      rankings,
+    })
   }
 
   /**
@@ -228,5 +240,12 @@ export class QuizRoom {
     // TODO: Annuler le timer
     // TODO: Changer la phase
     // TODO: Envoyer 'ended' a tous
+    if (this.timerId) {
+      clearInterval(this.timerId)
+      this.timerId = null
+    }
+
+    this.phase = 'ended'
+    this.broadcastToAll({ type: 'ended' })
   }
 }
