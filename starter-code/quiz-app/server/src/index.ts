@@ -191,6 +191,22 @@ wss.on('connection', (ws: WebSocket) => {
 
     // TODO: Nettoyer clientRoomMap si c'etait un joueur
     // TODO: Nettoyer hostRoomMap si c'etait un host
+    if (clientRoomMap.has(ws)) {
+      clientRoomMap.delete(ws)
+    }
+
+    const hostedRoom = hostRoomMap.get(ws)
+    if (hostedRoom) {
+      hostedRoom.end()
+      rooms.delete(hostedRoom.code)
+      hostRoomMap.delete(ws)
+
+      for (const [clientWs, mapping] of clientRoomMap.entries()) {
+        if (mapping.room === hostedRoom) {
+          clientRoomMap.delete(clientWs)
+        }
+      }
+    }
   })
 
   ws.on('error', (err: Error) => {
