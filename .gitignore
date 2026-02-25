@@ -17,6 +17,7 @@ Thumbs.db
 # Environment files
 .env
 .env.*
+!starter-code/quiz-app/.env.example
 
 # Editor / IDE temp files
 .vscode/
