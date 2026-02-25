@@ -6,10 +6,10 @@
 import { useState } from 'react'
 
 interface JoinScreenProps {
-  /** Callback appele quand le joueur soumet le formulaire */
-  onJoin: (code: string, name: string) => void
-  /** Message d'erreur optionnel (ex: "Code invalide") */
-  error?: string
+    /** Callback appele quand le joueur soumet le formulaire */
+    onJoin: (code: string, name: string) => void
+    /** Message d'erreur optionnel (ex: "Code invalide") */
+    error?: string
 }
 
 /**
@@ -27,24 +27,54 @@ interface JoinScreenProps {
  * .error-message, .btn-primary
  */
 function JoinScreen({ onJoin, error }: JoinScreenProps) {
-  // TODO: State pour le code du quiz
-  // TODO: State pour le pseudo
+    // TODO: State pour le code du quiz
+    // TODO: State pour le pseudo
+    const [code, setCode] = useState('')
+    const [name, setName] = useState('')
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault()
-    // TODO: Valider que les champs ne sont pas vides
-    // TODO: Appeler onJoin(code.toUpperCase(), name)
-  }
+    const handleSubmit = (e: React.FormEvent) => {
+        e.preventDefault()
+        // TODO: Valider que les champs ne sont pas vides
+        // TODO: Appeler onJoin(code.toUpperCase(), name)
+        if (!code.trim() || !name.trim()) return
+        onJoin(code.toUpperCase(), name.trim())
+    }
 
-  return (
-    <form className="join-form" onSubmit={handleSubmit}>
-      <h1>Rejoindre un Quiz</h1>
-      {/* TODO: Afficher l'erreur si elle existe */}
-      {/* TODO: Champ code du quiz avec classe .code-input */}
-      {/* TODO: Champ pseudo */}
-      {/* TODO: Bouton Rejoindre */}
-    </form>
-  )
+    return (
+        <form className="join-form" onSubmit={handleSubmit}>
+            <h1>Rejoindre un Quiz</h1>
+            {/* TODO: Afficher l'erreur si elle existe */}
+            {error && <p className="error-message">{error}</p>}
+            {/* TODO: Champ code du quiz avec classe .code-input */}
+            <div className="form-group">
+                <label>Code du quiz</label>
+                <input
+                    className="code-input"
+                    type="text"
+                    placeholder="ABC123"
+                    maxLength={6}
+                    value={code}
+                    onChange={(e) => setCode(e.target.value.toUpperCase())}
+                    required
+                />
+            </div>
+            {/* TODO: Champ pseudo */}
+            <div className="form-group">
+                <label>Pseudo</label>
+                <input
+                    type="text"
+                    placeholder="Ton pseudo"
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
+                    required
+                />
+            </div>
+            {/* TODO: Bouton Rejoindre */}
+            <button className="btn-primary" type="submit">
+                Rejoindre
+            </button>
+        </form>
+    )
 }
 
 export default JoinScreen
