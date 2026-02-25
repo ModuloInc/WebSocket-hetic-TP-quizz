@@ -191,6 +191,16 @@ export class QuizRoom {
     // TODO: Recuperer la question courante
     // TODO: Creer l'objet question SANS correctIndex (utiliser destructuring)
     // TODO: Envoyer a tous via broadcastToAll()
+    const currentQuestion = this.questions[this.currentQuestionIndex]
+    if (!currentQuestion) return
+
+    const { correctIndex: _correctIndex, ...questionWithoutAnswer } = currentQuestion
+    this.broadcastToAll({
+      type: 'question',
+      question: questionWithoutAnswer,
+      index: this.currentQuestionIndex,
+      total: this.questions.length,
+    })
   }
 
   /**
@@ -204,6 +214,27 @@ export class QuizRoom {
     // TODO: Calculer la distribution des reponses
     // TODO: Construire l'objet scores { nom: score }
     // TODO: Envoyer 'results' a tous
+    const currentQuestion = this.questions[this.currentQuestionIndex]
+    if (!currentQuestion) return
+
+    const distribution = new Array(currentQuestion.choices.length).fill(0)
+    for (const choiceIndex of this.answers.values()) {
+      if (choiceIndex >= 0 && choiceIndex < distribution.length) {
+        distribution[choiceIndex] += 1
+      }
+    }
+
+    const scores: Record<string, number> = {}
+    for (const player of this.players.values()) {
+      scores[player.name] = this.scores.get(player.id) ?? 0
+    }
+
+    this.broadcastToAll({
+      type: 'results',
+      correctIndex: currentQuestion.correctIndex,
+      distribution,
+      scores,
+    })
   }
 
   /**
