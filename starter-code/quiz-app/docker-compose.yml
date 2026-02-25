@@ -1,0 +1,85 @@
+services:
+  server:
+    build:
+      context: .
+      dockerfile: server/Dockerfile
+    networks:
+      - quiz_internal
+      - web
+    labels:
+      - "traefik.enable=true"
+      - "traefik.docker.network=web"
+      - "traefik.http.routers.quiz-ws.rule=Host(`${API_DOMAIN:-localhost}`)"
+      - "traefik.http.routers.quiz-ws.entrypoints=websecure"
+      - "traefik.http.routers.quiz-ws.tls.certresolver=letsencrypt"
+      - "traefik.http.services.quiz-ws.loadbalancer.server.port=3001"
+    ports:
+      - "3001:3001"
+
+  host-app:
+    build:
+      context: .
+      dockerfile: host-app/Dockerfile
+    depends_on:
+      - server
+    command: >-
+      sh -c '
+      if [ -z "$API_DOMAIN" ] || [ "$API_DOMAIN" = "localhost" ]; then
+        export VITE_WS_URL=ws://localhost:3001;
+      else
+        export VITE_WS_URL=wss://$API_DOMAIN;
+      fi;
+      npm run dev --prefix host-app -- --host 0.0.0.0 --port 5173 --base /host/
+      '
+    environment:
+      - API_DOMAIN=${API_DOMAIN:-localhost}
+    networks:
+      - quiz_internal
+      - web
+    labels:
+      - "traefik.enable=true"
+      - "traefik.docker.network=web"
+      - "traefik.http.routers.quiz-host.rule=Host(`${FRONT_DOMAIN:-localhost}`) && PathPrefix(`/host`)"
+      - "traefik.http.routers.quiz-host.entrypoints=websecure"
+      - "traefik.http.routers.quiz-host.priority=110"
+      - "traefik.http.routers.quiz-host.tls.certresolver=letsencrypt"
+      - "traefik.http.services.quiz-host.loadbalancer.server.port=5173"
+    ports:
+      - "5173:5173"
+
+  player-app:
+    build:
+      context: .
+      dockerfile: player-app/Dockerfile
+    depends_on:
+      - server
+    command: >-
+      sh -c '
+      if [ -z "$API_DOMAIN" ] || [ "$API_DOMAIN" = "localhost" ]; then
+        export VITE_WS_URL=ws://localhost:3001;
+      else
+        export VITE_WS_URL=wss://$API_DOMAIN;
+      fi;
+      npm run dev --prefix player-app -- --host 0.0.0.0 --port 5174 --base /player/
+      '
+    environment:
+      - API_DOMAIN=${API_DOMAIN:-localhost}
+    networks:
+      - quiz_internal
+      - web
+    labels:
+      - "traefik.enable=true"
+      - "traefik.docker.network=web"
+      - "traefik.http.routers.quiz-player.rule=Host(`${FRONT_DOMAIN:-localhost}`) && PathPrefix(`/player`)"
+      - "traefik.http.routers.quiz-player.entrypoints=websecure"
+      - "traefik.http.routers.quiz-player.priority=110"
+      - "traefik.http.routers.quiz-player.tls.certresolver=letsencrypt"
+      - "traefik.http.services.quiz-player.loadbalancer.server.port=5174"
+    ports:
+      - "5174:5174"
+
+networks:
+  quiz_internal:
+    name: quiz-app-internal-network
+  web:
+    external: true

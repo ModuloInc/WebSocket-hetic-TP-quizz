@@ -110,6 +110,25 @@ cd player-app
 npm run dev
 ```
 
+### Demarrage avec Docker (1 commande)
+
+Depuis le dossier `quiz-app/` :
+
+```bash
+docker compose up --build
+```
+
+Applications disponibles :
+- Serveur WebSocket : `ws://localhost:3001`
+- Host App : `http://localhost:5173`
+- Player App : `http://localhost:5174`
+
+Pour arreter :
+
+```bash
+docker compose down
+```
+
 ## Repartition de l'equipe (3 personnes)
 
 ### Personne 1 : Serveur (`server/`)
