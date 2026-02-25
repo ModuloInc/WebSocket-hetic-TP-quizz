@@ -1,0 +1,29 @@
+services:
+  server:
+    build:
+      context: .
+      dockerfile: server/Dockerfile
+    ports:
+      - "3001:3001"
+
+  host-app:
+    build:
+      context: .
+      dockerfile: host-app/Dockerfile
+    depends_on:
+      - server
+    environment:
+      - VITE_WS_URL=ws://localhost:3001
+    ports:
+      - "5173:5173"
+
+  player-app:
+    build:
+      context: .
+      dockerfile: player-app/Dockerfile
+    depends_on:
+      - server
+    environment:
+      - VITE_WS_URL=ws://localhost:3001
+    ports:
+      - "5174:5174"
