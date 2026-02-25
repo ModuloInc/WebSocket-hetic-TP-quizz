@@ -135,6 +135,25 @@ export class QuizRoom {
     // TODO: Enregistrer la reponse
     // TODO: Calculer le score si correct
     // TODO: Si tout le monde a repondu, terminer la question
+    if (this.phase !== 'question') return
+    if (!this.players.has(playerId)) return
+    if (this.answers.has(playerId)) return
+
+    const currentQuestion = this.questions[this.currentQuestionIndex]
+    if (!currentQuestion) return
+    if (choiceIndex < 0 || choiceIndex >= currentQuestion.choices.length) return
+
+    this.answers.set(playerId, choiceIndex)
+
+    if (choiceIndex === currentQuestion.correctIndex) {
+      const speedBonus = Math.round(50 * (this.remaining / currentQuestion.timerSec))
+      const earnedScore = 100 + speedBonus
+      this.scores.set(playerId, (this.scores.get(playerId) ?? 0) + earnedScore)
+    }
+
+    if (this.players.size > 0 && this.answers.size >= this.players.size) {
+      this.timeUp()
+    }
   }
 
   /**
