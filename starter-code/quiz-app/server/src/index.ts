@@ -58,6 +58,18 @@ wss.on('connection', (ws: WebSocket) => {
         // TODO: Si la salle n'est pas en phase 'lobby', envoyer une erreur
         // TODO: Appeler room.addPlayer(message.name, ws)
         // TODO: Stocker l'association ws -> { room, playerId } dans clientRoomMap
+        const room = rooms.get(message.quizCode)
+        if (!room) {
+          send(ws, { type: 'error', message: 'Quiz introuvable' })
+          break
+        }
+        if (room.phase !== 'lobby') {
+          send(ws, { type: 'error', message: "Impossible de rejoindre: le quiz n'est plus en lobby" })
+          break
+        }
+
+        const playerId = room.addPlayer(message.name, ws)
+        clientRoomMap.set(ws, { room, playerId })
         break
       }
 
@@ -68,6 +80,13 @@ wss.on('connection', (ws: WebSocket) => {
         // TODO: Recuperer le { room, playerId } depuis clientRoomMap
         // TODO: Si non trouve, envoyer une erreur
         // TODO: Appeler room.handleAnswer(playerId, message.choiceIndex)
+        const mapping = clientRoomMap.get(ws)
+        if (!mapping) {
+          send(ws, { type: 'error', message: 'Joueur non associe a une salle' })
+          break
+        }
+
+        mapping.room.handleAnswer(mapping.playerId, message.choiceIndex)
         break
       }
 
@@ -81,7 +100,21 @@ wss.on('connection', (ws: WebSocket) => {
         // TODO: Stocker la room dans rooms (cle = code)
         // TODO: Stocker l'association host ws -> room dans hostRoomMap
         // TODO: Envoyer un message sync au host : { type: 'sync', phase: 'lobby', data: { quizCode: code } }
-        console.log(`[Server] Quiz cree avec le code: ???`)
+        let code = generateQuizCode()
+        while (rooms.has(code)) {
+          code = generateQuizCode()
+        }
+
+        const room = new QuizRoom(Date.now().toString(), code)
+        room.hostWs = ws
+        room.title = message.title
+        room.questions = message.questions
+
+        rooms.set(code, room)
+        hostRoomMap.set(ws, room)
+
+        send(ws, { type: 'sync', phase: 'lobby', data: { quizCode: code } })
+        console.log(`[Server] Quiz cree avec le code: ${code}`)
         break
       }
 
@@ -92,6 +125,13 @@ wss.on('connection', (ws: WebSocket) => {
         // TODO: Recuperer la room depuis hostRoomMap
         // TODO: Si non trouvee, envoyer une erreur
         // TODO: Appeler room.start()
+        const room = hostRoomMap.get(ws)
+        if (!room) {
+          send(ws, { type: 'error', message: 'Aucun quiz host trouve pour cette connexion' })
+          break
+        }
+
+        room.start()
         break
       }
 
@@ -102,6 +142,13 @@ wss.on('connection', (ws: WebSocket) => {
         // TODO: Recuperer la room depuis hostRoomMap
         // TODO: Si non trouvee, envoyer une erreur
         // TODO: Appeler room.nextQuestion()
+        const room = hostRoomMap.get(ws)
+        if (!room) {
+          send(ws, { type: 'error', message: 'Aucun quiz host trouve pour cette connexion' })
+          break
+        }
+
+        room.nextQuestion()
         break
       }
 
@@ -114,6 +161,21 @@ wss.on('connection', (ws: WebSocket) => {
         // TODO: Appeler room.end()
         // TODO: Supprimer la room de rooms
         // TODO: Nettoyer hostRoomMap et clientRoomMap
+        const room = hostRoomMap.get(ws)
+        if (!room) {
+          send(ws, { type: 'error', message: 'Aucun quiz host trouve pour cette connexion' })
+          break
+        }
+
+        room.end()
+        rooms.delete(room.code)
+        hostRoomMap.delete(ws)
+
+        for (const [clientWs, mapping] of clientRoomMap.entries()) {
+          if (mapping.room === room) {
+            clientRoomMap.delete(clientWs)
+          }
+        }
         break
       }
 
@@ -129,6 +191,22 @@ wss.on('connection', (ws: WebSocket) => {
 
     // TODO: Nettoyer clientRoomMap si c'etait un joueur
     // TODO: Nettoyer hostRoomMap si c'etait un host
+    if (clientRoomMap.has(ws)) {
+      clientRoomMap.delete(ws)
+    }
+
+    const hostedRoom = hostRoomMap.get(ws)
+    if (hostedRoom) {
+      hostedRoom.end()
+      rooms.delete(hostedRoom.code)
+      hostRoomMap.delete(ws)
+
+      for (const [clientWs, mapping] of clientRoomMap.entries()) {
+        if (mapping.room === hostedRoom) {
+          clientRoomMap.delete(clientWs)
+        }
+      }
+    }
   })
 
   ws.on('error', (err: Error) => {
