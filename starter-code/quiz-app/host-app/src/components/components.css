@@ -1,0 +1,120 @@
+/* ============================================================
+   Components extra styles
+   Styles complementaires pour les composants host-app
+   ============================================================ */
+
+/* --- CreateQuiz --- */
+.create-form-container {
+    max-width: 680px;
+    width: 100%;
+  }
+  
+  .validation-errors {
+    background: #7f1d1d;
+    color: #fca5a5;
+    border-radius: 8px;
+    padding: 0.75rem 1rem;
+    margin-bottom: 1rem;
+    text-align: left;
+    font-size: 0.9rem;
+  }
+  
+  .validation-errors div + div {
+    margin-top: 0.25rem;
+  }
+  
+  .choice-badge {
+    color: white;
+    border-radius: 6px;
+    padding: 0 8px;
+    font-weight: 700;
+    font-size: 0.9rem;
+    flex-shrink: 0;
+  }
+  
+  .choice-badge--red   { background: #e21b3c; }
+  .choice-badge--blue  { background: #1368ce; }
+  .choice-badge--yellow{ background: #d89e00; }
+  .choice-badge--green { background: #26890c; }
+  
+  .form-timer-group {
+    max-width: 200px;
+  }
+  
+  .submit-wrapper {
+    margin-top: 1.5rem;
+  }
+  
+  /* --- QuestionView --- */
+  .progress-bar-wrapper {
+    margin-top: 1rem;
+    height: 6px;
+    background: #1e1e4a;
+    border-radius: 9999px;
+    overflow: hidden;
+  }
+  
+  .progress-bar-fill {
+    height: 100%;
+    background: #7c3aed;
+    border-radius: 9999px;
+    transition: width 0.4s ease;
+  }
+  
+  .progress-bar-label {
+    margin-top: 0.4rem;
+    font-size: 0.9rem;
+    color: #94a3b8;
+  }
+  
+  .choice-label-badge {
+    display: inline-block;
+    color: white;
+    border-radius: 4px;
+    padding: 0 6px;
+    font-weight: 700;
+    font-size: 0.8rem;
+    margin-right: 0.4rem;
+  }
+  
+  .choice-label-badge--red    { background: #e21b3c; }
+  .choice-label-badge--blue   { background: #1368ce; }
+  .choice-label-badge--yellow { background: #d89e00; }
+  .choice-label-badge--green  { background: #26890c; }
+  
+  /* --- Results --- */
+  .results-recap {
+    color: #94a3b8;
+    margin-bottom: 1.5rem;
+    font-size: 0.95rem;
+  }
+  
+  .results-recap strong {
+    color: #10b981;
+    font-weight: 700;
+  }
+  
+  .result-bar-count-outside {
+    min-width: 24px;
+    text-align: right;
+    color: #94a3b8;
+    font-size: 0.9rem;
+    font-weight: 600;
+  }
+  
+  .btn-next {
+    margin-top: 2rem;
+    width: 100%;
+  }
+  
+  /* --- Leaderboard --- */
+  .leaderboard-recap {
+    margin-top: 1.5rem;
+    color: #94a3b8;
+    font-size: 0.9rem;
+  }
+  
+  .leaderboard-recap span {
+    color: #a78bfa;
+    font-weight: 700;
+  }

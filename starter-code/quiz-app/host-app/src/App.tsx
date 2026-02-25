@@ -5,7 +5,7 @@
 
 import { useState, useEffect } from 'react'
 import { useWebSocket } from './hooks/useWebSocket'
-import type { QuizPhase, QuizQuestion, ServerMessage } from '@shared/index'
+import type { QuizPhase, QuizQuestion } from '@shared/index'
 import CreateQuiz from './components/CreateQuiz'
 import Lobby from './components/Lobby'
 import QuestionView from './components/QuestionView'
@@ -42,11 +42,17 @@ function App() {
         // TODO: Quand le serveur envoie un sync (apres host:create),
         // extraire le quizCode de lastMessage.data et mettre a jour l'etat
         // Changer la phase vers lastMessage.phase
+        const data = lastMessage.data as { quizCode: string }
+        if (data?.quizCode) {
+          setQuizCode(data.quizCode)
+        }
+        setPhase(lastMessage.phase)
         break
       }
 
       case 'joined': {
         // TODO: Mettre a jour la liste des joueurs avec lastMessage.players
+        setPlayers(lastMessage.players)
         break
       }
 
@@ -55,11 +61,18 @@ function App() {
         // TODO: Initialiser remaining avec la duree du timer de la question
         // TODO: Reinitialiser answerCount a 0
         // TODO: Changer la phase en 'question'
+        setCurrentQuestion(lastMessage.question)
+        setQuestionIndex(lastMessage.index)
+        setQuestionTotal(lastMessage.total)
+        setRemaining(lastMessage.question.timerSec)
+        setAnswerCount(0)
+        setPhase('question')
         break
       }
 
       case 'tick': {
         // TODO: Mettre a jour remaining avec lastMessage.remaining
+        setRemaining(lastMessage.remaining)
         break
       }
 
@@ -67,22 +80,31 @@ function App() {
         // TODO: Mettre a jour correctIndex, distribution
         // TODO: Calculer answerCount (somme de distribution)
         // TODO: Changer la phase en 'results'
+        setCorrectIndex(lastMessage.correctIndex)
+        setDistribution(lastMessage.distribution)
+        setAnswerCount(lastMessage.distribution.reduce((a, b) => a + b, 0))
+        setPhase('results')
         break
       }
 
       case 'leaderboard': {
         // TODO: Mettre a jour rankings avec lastMessage.rankings
         // TODO: Changer la phase en 'leaderboard'
+        setRankings(lastMessage.rankings)
+        setPhase('leaderboard')
         break
       }
 
       case 'ended': {
         // TODO: Changer la phase en 'ended'
+        setPhase('ended')
         break
       }
 
       case 'error': {
         // TODO: Afficher l'erreur (console.error ou alert)
+        console.error('[Host] Erreur serveur:', lastMessage.message)
+        alert(`Erreur : ${lastMessage.message}`)
         break
       }
     }
@@ -93,16 +115,23 @@ function App() {
   /** Appele quand le host soumet le formulaire de creation */
   const handleCreateQuiz = (title: string, questions: QuizQuestion[]) => {
     // TODO: Envoyer un message 'host:create' au serveur avec sendMessage
+    sendMessage({ type: 'host:create', title, questions })
+
+    // TEMPORAIRE — a supprimer quand le serveur renvoie le sync
+    // setQuizCode('TEST42')
+    // setPhase('lobby')
   }
 
   /** Appele quand le host clique sur "Demarrer" dans le lobby */
   const handleStart = () => {
     // TODO: Envoyer un message 'host:start' au serveur
+    sendMessage({ type: 'host:start' })
   }
 
   /** Appele quand le host clique sur "Question suivante" */
   const handleNext = () => {
     // TODO: Envoyer un message 'host:next' au serveur
+    sendMessage({ type: 'host:next' })
   }
 
   // --- Rendu par phase ---
@@ -148,9 +177,18 @@ function App() {
       case 'ended':
         return (
           <div className="phase-container">
-            <h1>Quiz termine !</h1>
-            <button className="btn-primary" onClick={() => setPhase('create')}>
-              Creer un nouveau quiz
+            <h1>Quiz terminé !</h1>
+            <button
+              className="btn-primary"
+              onClick={() => {
+                setPhase('create')
+                setPlayers([])
+                setQuizCode('')
+                setCurrentQuestion(null)
+                setRankings([])
+              }}
+            >
+              Créer un nouveau quiz
             </button>
           </div>
         )
@@ -165,12 +203,14 @@ function App() {
       <header className="app-header">
         <h2>Quiz Host</h2>
         <span className={`status-badge status-${status}`}>
-          {status === 'connected' ? 'Connecte' : status === 'connecting' ? 'Connexion...' : 'Deconnecte'}
+          {status === 'connected'
+            ? 'Connecté'
+            : status === 'connecting'
+            ? 'Connexion...'
+            : 'Déconnecté'}
         </span>
       </header>
-      <main className="app-main">
-        {renderPhase()}
-      </main>
+      <main className="app-main">{renderPhase()}</main>
     </div>
   )
 }

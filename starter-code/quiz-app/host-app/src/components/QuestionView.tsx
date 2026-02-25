@@ -34,14 +34,82 @@ interface QuestionViewProps {
  * Note : cote host on affiche les choix mais sans interaction
  * (c'est purement visuel pour projeter au mur)
  */
+
+// Couleurs et labels des choix Kahoot
+const CHOICE_COLORS = ['#e21b3c', '#1368ce', '#d89e00', '#26890c']
+const CHOICE_LABELS = ['A', 'B', 'C', 'D']
+
+// Classes CSS des badges de couleur dans les barres de resultats
+const CHOICE_LABEL_BADGE_CLASSES = [
+  'choice-label-badge choice-label-badge--red',
+  'choice-label-badge choice-label-badge--blue',
+  'choice-label-badge choice-label-badge--yellow',
+  'choice-label-badge choice-label-badge--green',
+]
+
 function QuestionView({ question, index, total, remaining, answerCount, totalPlayers }: QuestionViewProps) {
+  // Classes CSS du timer selon le temps restant
+  const timerClass = [
+    'countdown-circle',
+    remaining <= 3 ? 'danger' : remaining <= 10 ? 'warning' : '',
+  ]
+    .filter(Boolean)
+    .join(' ')
+
+  // Pourcentage de joueurs ayant repondu
+  const progressPct = totalPlayers > 0
+    ? Math.round((answerCount / totalPlayers) * 100)
+    : 0
+
   return (
     <div className="phase-container">
+
       {/* TODO: En-tete "Question {index + 1} / {total}" */}
+      <div className="question-header">
+        <span>Question {index + 1} / {total}</span>
+        <span>{answerCount} / {totalPlayers} réponses</span>
+      </div>
+
       {/* TODO: Timer avec .countdown-circle (+ .warning / .danger selon remaining) */}
+      <div className="countdown">
+        <div className={timerClass}>{remaining}</div>
+      </div>
+
       {/* TODO: Texte de la question avec .question-text */}
+      <p className="question-text">{question.text}</p>
+
       {/* TODO: Grille des 4 choix avec .choices-grid et .choice-card */}
+      {/* Note : cote host on affiche les choix mais sans interaction */}
+      <div className="choices-grid">
+        {question.choices.map((choice, i) => (
+          <div
+            key={i}
+            className="choice-card"
+            style={{ background: CHOICE_COLORS[i] }}
+          >
+            <span className={CHOICE_LABEL_BADGE_CLASSES[i]}>
+              {CHOICE_LABELS[i]}
+            </span>
+            {choice}
+          </div>
+        ))}
+      </div>
+
       {/* TODO: Compteur "{answerCount} / {totalPlayers} reponses" */}
+      <div className="answer-counter">
+        <div className="progress-bar-wrapper">
+          <div
+            className="progress-bar-fill"
+            style={{ width: `${progressPct}%` }}
+          />
+        </div>
+        <p className="progress-bar-label">
+          {totalPlayers > 0
+            ? `${progressPct}% ont répondu`
+            : 'En attente de réponses...'}
+        </p>
+      </div>
+
     </div>
   )
 }
