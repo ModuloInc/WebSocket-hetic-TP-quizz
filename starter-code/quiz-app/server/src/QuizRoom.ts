@@ -71,7 +71,20 @@ export class QuizRoom {
     // TODO: Initialiser le score a 0
     // TODO: Envoyer 'joined' a tous les clients
     // TODO: Retourner l'ID du joueur
-    return ''
+    const playerId = `${Date.now()}-${Math.random().toString(36).slice(2, 10)}`
+    const normalizedName = name.trim() || 'Player'
+    const player: Player = { id: playerId, name: normalizedName, ws }
+
+    this.players.set(playerId, player)
+    this.scores.set(playerId, 0)
+
+    this.broadcastToAll({
+      type: 'joined',
+      playerId,
+      players: Array.from(this.players.values()).map((p) => p.name),
+    })
+
+    return playerId
   }
 
   /**
@@ -154,7 +167,7 @@ export class QuizRoom {
    */
   private getPlayerWsList(): WebSocket[] {
     // TODO: Extraire les ws de this.players.values()
-    return []
+    return Array.from(this.players.values()).map((player) => player.ws)
   }
 
   /**
@@ -163,6 +176,10 @@ export class QuizRoom {
   private broadcastToAll(message: ServerMessage): void {
     // TODO: Envoyer au host si connecte
     // TODO: Envoyer a tous les joueurs via broadcast()
+    if (this.hostWs) {
+      send(this.hostWs, message)
+    }
+    broadcast(this.getPlayerWsList(), message)
   }
 
   /**
