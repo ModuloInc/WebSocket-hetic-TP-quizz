@@ -58,6 +58,18 @@ wss.on('connection', (ws: WebSocket) => {
         // TODO: Si la salle n'est pas en phase 'lobby', envoyer une erreur
         // TODO: Appeler room.addPlayer(message.name, ws)
         // TODO: Stocker l'association ws -> { room, playerId } dans clientRoomMap
+        const room = rooms.get(message.quizCode)
+        if (!room) {
+          send(ws, { type: 'error', message: 'Quiz introuvable' })
+          break
+        }
+        if (room.phase !== 'lobby') {
+          send(ws, { type: 'error', message: "Impossible de rejoindre: le quiz n'est plus en lobby" })
+          break
+        }
+
+        const playerId = room.addPlayer(message.name, ws)
+        clientRoomMap.set(ws, { room, playerId })
         break
       }
 
@@ -68,6 +80,13 @@ wss.on('connection', (ws: WebSocket) => {
         // TODO: Recuperer le { room, playerId } depuis clientRoomMap
         // TODO: Si non trouve, envoyer une erreur
         // TODO: Appeler room.handleAnswer(playerId, message.choiceIndex)
+        const mapping = clientRoomMap.get(ws)
+        if (!mapping) {
+          send(ws, { type: 'error', message: 'Joueur non associe a une salle' })
+          break
+        }
+
+        mapping.room.handleAnswer(mapping.playerId, message.choiceIndex)
         break
       }
 
