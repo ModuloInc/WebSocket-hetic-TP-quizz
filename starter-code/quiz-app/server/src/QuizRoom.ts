@@ -96,6 +96,10 @@ export class QuizRoom {
   start(): void {
     // TODO: Verifier la phase et le nombre de joueurs
     // TODO: Appeler nextQuestion()
+    if (this.phase !== 'lobby') return
+    if (this.players.size < 1) return
+
+    this.nextQuestion()
   }
 
   /**
@@ -118,6 +122,32 @@ export class QuizRoom {
     // TODO: Changer la phase
     // TODO: Envoyer la question
     // TODO: Demarrer le compte a rebours
+    if (this.timerId) {
+      clearInterval(this.timerId)
+      this.timerId = null
+    }
+
+    this.currentQuestionIndex += 1
+
+    if (this.currentQuestionIndex >= this.questions.length) {
+      this.broadcastLeaderboard()
+      return
+    }
+
+    const currentQuestion = this.questions[this.currentQuestionIndex]
+    if (!currentQuestion) {
+      this.broadcastLeaderboard()
+      return
+    }
+
+    this.answers = new Map()
+    this.phase = 'question'
+    this.remaining = currentQuestion.timerSec
+    this.broadcastQuestion()
+
+    this.timerId = setInterval(() => {
+      this.tick()
+    }, 1000)
   }
 
   /**
